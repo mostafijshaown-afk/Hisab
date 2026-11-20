@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="bn"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clothing Faster Business</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1c2430;--mu:#6b7686;--bd:#e2e6ec;--ac:#0f766e;--ac2:#e6f4f2;--rd:#b42318;--gr:#067647;color-scheme:light;box-sizing:border-box;padding-top:0px;padding-bottom:0px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12161c;--card:#1b222b;--tx:#e8edf3;--mu:#9aa6b6;--bd:#2c3642;--ac:#2dd4bf;--ac2:#16322f;--rd:#f97066;--gr:#47cd89;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12161c;--card:#1b222b;--tx:#e8edf3;--mu:#9aa6b6;--bd:#2c3642;--ac:#2dd4bf;--ac2:#16322f;--rd:#f97066;--gr:#47cd89;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:0px}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,"Noto Sans Bengali","Kalpurush",sans-serif;padding-bottom:130px}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--card);border-bottom:1px solid var(--bd);position:sticky;top:0px;z-index:5}
+h1{font-size:18px;margin:0}main{padding:12px;max-width:640px;margin:auto}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.k{color:var(--mu);font-size:13px}.v{font-size:20px;font-weight:700}
+.pos{color:var(--gr)}.neg{color:var(--rd)}
+button,select,input{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:9px}
+input,select{width:100%;margin:4px 0 8px}
+button.p{background:var(--ac);color:#fff;border-color:var(--ac);font-weight:600;width:100%}
+button.s{padding:5px 9px;font-size:13px}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;overflow-x:auto;background:var(--card);border-top:1px solid var(--bd);padding-bottom:0px}
+nav button{flex:0 0 auto;min-width:78px;border:0;border-radius:0;background:none;padding:12px 6px;line-height:1.3;font-size:26px;color:var(--mu)}
+nav button.on{color:var(--ac);font-weight:700;background:var(--ac2)}
+.row{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd)}
+.row:last-child{border:0}.tag{font-size:12px;background:var(--ac2);color:var(--ac);padding:1px 7px;border-radius:99px}
+.wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px;text-align:right;border-bottom:1px solid var(--bd)}td:first-child,th:first-child{text-align:left}
+.th{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--bd);margin-top:4px}a{color:var(--ac)}.note{font-size:13px;color:var(--mu)}
+.av{width:56px;height:56px;border-radius:50%;object-fit:cover;background:var(--bd);flex:0 0 auto}.av.big{width:110px;height:110px}.av.hd{width:64px;height:64px}button.g{background:var(--gr);color:#fff;border-color:var(--gr);font-weight:600}button.r{background:var(--rd);color:#fff;border-color:var(--rd);font-weight:600}.phc{display:block;position:relative;width:110px;margin:8px auto;cursor:pointer}.phc span{position:absolute;right:0;bottom:0;background:var(--ac);color:#fff;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center}.ctr{text-align:center}.err{color:var(--rd);min-height:20px;margin:6px 0}
+tr.low td{background:var(--ac2)}
+</style><script src="config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f766e">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+</head><body>
+<header><h1 id="ttl"></h1><button class="s" id="lg"></button></header>
+<main id="app"><p class="note">লোড হচ্ছে… / Loading…</p></main>
+<nav id="nav"></nav>
+<script>
+const T={
+bn:{app:"ব্যবসার হিসাব",dash:"হিসাব",month:"মাস বাছুন",monthS:"মাস",newS:"নতুন",sell:"বিক্রি",buy:"কেনা",stock:"স্টক",other:"অন্যান্য",party:"পার্টি",log:"পরিবর্তন",set:"সেটিংস",bgT:"ব্যাকগ্রাউন্ড রঙ",rst:"আগের রঙে ফিরুন",langT:"ভাষা",em:"ইমেইল",pw:"পাসওয়ার্ড",lgin:"ঢুকুন",out:"লগআউট",wrong:"ইমেইল বা পাসওয়ার্ড ভুল",sv:"ফাইল সেভ",exc:"📄 Excel (CSV) ফাইল সেভ করুন",exj:"💾 ব্যাকআপ ফাইল (JSON)",noDl:"এই ব্রাউজারে ফাইল সেভ হচ্ছে না",lang:"English",
+sale_retail:"খুচরা বিক্রি",sale_wholesale:"পাইকারি বিক্রি",purchase:"মাল কেনা",expense:"অন্যান্য খরচ",deposit:"ব্যাংকে জমা (ক্যাশ→ব্যাংক)",withdraw:"ব্যাংক থেকে তোলা (ব্যাংক→ক্যাশ)",recv:"বাকি টাকা পেলাম",pay:"বাকি টাকা দিলাম",
+cash:"ক্যাশ",bank:"ব্যাংক",type:"ধরন",amt:"টাকা (মোট)",acct:"কোথায়",date:"তারিখ",note:"বিবরণ (ঐচ্ছিক)",save:"সংরক্ষণ",
+sales:"মোট বিক্রি",pur:"মোট মাল কেনা",exp:"মোট খরচ",profit:"আনুমানিক লাভ (বিক্রি − কেনা − খরচ)",cashBal:"ক্যাশ আছে",bankBal:"ব্যাংকে আছে",total:"মোট টাকা",both:"দুজনের মিলিয়ে",
+all:"সবাই",mine:"আমার",del:"মুছুন",edit:"বদলান",ro:"শুধু দেখতে পারবেন",yourName:"আপনার নাম লিখুন",go:"শুরু করুন",viewOnly:"এন্ট্রি দেওয়ার অনুমতি নেই — শুধু দেখতে পারবেন।",none:"কিছু নেই",saved:"সংরক্ষিত হয়েছে",err:"সংরক্ষণ করা যায়নি",sure:"মুছে ফেলবেন?",cancel:"বাতিল",upd:"আপডেট",who:"কে",
+item:"মালের নাম (যেমন: পোলো)",qty:"পিস",bought:"কেনা",sold:"বিক্রি",left:"স্টকে আছে",pcs:"পিস",ltot:"মোট",flow:"এই মাসে ক্যাশ/ব্যাংকে বাড়া-কমা",
+pn:"নাম",phone:"ফোন",addr:"ঠিকানা",kind:"ধরন",k_customer:"কাস্টমার",k_wholesaler:"পাইকার",k_supplier:"সাপ্লায়ার",addP:"নতুন পার্টি যোগ করুন",prt:"পার্টি (ঐচ্ছিক)",paid:"এখন কত টাকা নগদ হলো? (ফাঁকা = পুরো)",photo:"ছবি (মাল/চালান)",toGet:"পাবো",toGive:"দেব",totGet:"মোট পাবো",totGive:"মোট দেব",up:"আপলোড হচ্ছে…",settled:"মিটে গেছে",a_add:"যোগ করেছেন",a_edit:"বদলেছেন",a_del:"মুছেছেন",needP:"পার্টি বাছুন"},
+en:{app:"Business Hisab",dash:"Summary",month:"Choose month",monthS:"Month",newS:"New",sell:"Sales",buy:"Buys",stock:"Stock",other:"Other",party:"Parties",log:"Changes",set:"Settings",bgT:"Background colour",rst:"Reset colour",langT:"Language",em:"Email",pw:"Password",lgin:"Log in",out:"Log out",wrong:"Wrong email or password",sv:"Save file",exc:"📄 Save Excel (CSV) file",exj:"💾 Backup file (JSON)",noDl:"File saving is not available here",lang:"বাংলা",
+sale_retail:"Retail sale",sale_wholesale:"Wholesale sale",purchase:"Purchase (stock)",expense:"Other expense",deposit:"Deposit to bank (cash→bank)",withdraw:"Withdraw from bank (bank→cash)",recv:"Due received",pay:"Due paid",
+cash:"Cash",bank:"Bank",type:"Type",amt:"Total amount (৳)",acct:"Account",date:"Date",note:"Note (optional)",save:"Save",
+sales:"Total sales",pur:"Total purchases",exp:"Total expenses",profit:"Est. profit (sales − purchase − expense)",cashBal:"Cash in hand",bankBal:"In bank",total:"Total money",both:"Both combined",
+all:"Everyone",mine:"Mine",del:"Delete",edit:"Edit",ro:"View only",yourName:"Enter your name",go:"Start",viewOnly:"No permission to add entries — view only.",none:"Nothing yet",saved:"Saved",err:"Could not save",sure:"Delete this?",cancel:"Cancel",upd:"Update",who:"By",
+item:"Item name (e.g. polo)",qty:"Qty (pcs)",bought:"Bought",sold:"Sold",left:"In stock",pcs:"pcs",ltot:"Total",flow:"Cash/bank change this month",
+pn:"Name",phone:"Phone",addr:"Address",kind:"Kind",k_customer:"Customer",k_wholesaler:"Wholesaler",k_supplier:"Supplier",addP:"Add new party",prt:"Party (optional)",paid:"Cash paid now? (blank = full)",photo:"Photo (item/challan)",toGet:"To receive",toGive:"To pay",totGet:"Total to receive",totGive:"Total to pay",up:"Uploading…",settled:"Settled",a_add:"added",a_edit:"edited",a_del:"deleted",needP:"Choose a party"}};
+const EM={sale_retail:"🟢🛍️",sale_wholesale:"🟢📦",purchase:"🔴🛒",expense:"💸",deposit:"🏦⬆️",withdraw:"🏧⬇️",recv:"🟢🤝",pay:"🔴🤝"};
+const LST={sell:["sale_retail","sale_wholesale"],buy:["purchase"],other:["expense","deposit","withdraw","recv","pay"]};
+const TYPES=Object.keys(EM),NAV=[["dash","📊"],["month","📅"],["add","➕"],["sell","🟢"],["buy","🔴"],["stock","📦"],["party","👥"],["other","💸"],["log","📝"],["set","⚙️"]];
+let L="bn",tab="dash",flt="all",books={},me=null,db=null,assets=null,canWrite=true,editId=null,editUid=null,loaded=false,toast="",sel="",mon="",mflt="all",pend=null,pSel="",rf="",rt="";
+try{L=localStorage.getItem("hl")||"bn";const bg=localStorage.getItem("hbg");if(bg)document.documentElement.style.setProperty("--bg",bg)}catch(e){}
+const t=k=>T[L][k]||k,lbl=k=>EM[k]+" "+t(k);
+const fmt=n=>"৳"+Math.round(n).toLocaleString(L==="bn"?"bn-BD":"en-US");
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const isS=ty=>ty.startsWith("sale"),isSP=ty=>isS(ty)||ty==="purchase";
+const pd=e=>(e.paid===undefined||e.paid===null||e.paid==="")?(+e.amt||0):+e.paid;
+function calc(list){const r={sales:0,pur:0,exp:0,cash:0,bank:0};
+ for(const e of list){const a=+e.amt||0,p=pd(e);
+  if(isS(e.type)){r.sales+=a;r[e.acct]+=p}else if(e.type==="purchase"){r.pur+=a;r[e.acct]-=p}
+  else if(e.type==="expense"){r.exp+=a;r[e.acct]-=a}else if(e.type==="recv")r[e.acct]+=a;else if(e.type==="pay")r[e.acct]-=a;
+  else if(e.type==="deposit"){r.cash-=a;r.bank+=a}else if(e.type==="withdraw"){r.bank-=a;r.cash+=a}}
+ return r}
+const allE=()=>Object.entries(books).flatMap(([uid,b])=>(b.entries||[]).map(e=>({...e,uid,pname:b.name})));
+const allP=()=>Object.entries(books).flatMap(([uid,b])=>(b.parties||[]).map(p=>({...p,uid})));
+function delta(e){const a=+e.amt||0;if(isS(e.type))return a-pd(e);if(e.type==="purchase")return -(a-pd(e));if(e.type==="recv")return -a;if(e.type==="pay")return a;return 0}
+function balOf(list){let b=0;for(const e of list)b+=delta(e);return b}
+const pname=id=>{const p=allP().find(x=>x.id===id);return p?p.name:""};
+const sm=e=>e?`${lbl(e.type)} ${fmt(e.amt)}${e.item?" · "+esc(e.item)+"×"+(e.qty||0):""}${e.party?" · "+esc(pname(e.party)):""}`:"";
+function card(c,label){const pr=c.sales-c.pur-c.exp;return `<div class="card"><div class="k">${label}</div><div class="v ${c.cash+c.bank>=0?'pos':'neg'}">${fmt(c.cash+c.bank)}</div><div class="grid" style="margin-top:8px"><div><div class="k">💵 ${t("cashBal")}</div><b>${fmt(c.cash)}</b></div><div><div class="k">🏦 ${t("bankBal")}</div><b>${fmt(c.bank)}</b></div><div><div class="k">🟢 ${t("sales")}</div><b>${fmt(c.sales)}</b></div><div><div class="k">🔴 ${t("pur")}</div><b>${fmt(c.pur)}</b></div><div><div class="k">💸 ${t("exp")}</div><b>${fmt(c.exp)}</b></div><div><div class="k">${t("profit")}</div><b class="${pr>=0?'pos':'neg'}">${fmt(pr)}</b></div></div></div>`}
+const names=()=>Object.entries(books).filter(([,b])=>b.name);
+function dues(){let g=0,o=0;const E=allE();allP().forEach(p=>{const b=balOf(E.filter(e=>e.party===p.id));if(b>0)g+=b;else o-=b});return [g,o]}
+function dash(){const cur=(sel&&books[sel])?sel:me,[g,o]=dues();
+ return card(calc(allE()),"👥 "+t("both"))+`<div class="card note">🤝 ${t("totGet")}: <b class="pos">${fmt(g)}</b> · ${t("totGive")}: <b class="neg">${fmt(o)}</b></div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">${names().map(([u,b])=>`<button data-p="${u}" style="flex:1;font-weight:700;${u===cur?'background:var(--ac);color:#fff;border-color:var(--ac)':''}">${esc(b.name)}</button>`).join("")}</div>`+(books[cur]?card(calc(books[cur].entries||[]),"👤 "+esc(books[cur].name||"")):"")}
+function qtyTable(E){const m={};E.forEach(e=>{if(!e.item)return;const k=e.item.trim().toLowerCase();m[k]=m[k]||{n:e.item.trim(),b:0,s:0};const q=+e.qty||0;if(e.type==="purchase")m[k].b+=q;else if(isS(e.type))m[k].s+=q});return Object.values(m).sort((a,b)=>a.n.localeCompare(b.n))}
+const thr=()=>{try{const v=localStorage.getItem("hlow");return v===null||v===""?5:(parseInt(v)||0)}catch(e){return 5}};
+const lowItems=()=>qtyTable(allE()).filter(x=>x.b-x.s<=thr());
+function monthV(){if(!mon)mon=today().slice(0,7);
+ let E=allE().filter(e=>(e.date||"").slice(0,7)===mon);if(mflt!=="all")E=E.filter(e=>e.uid===mflt);
+ const c=calc(E),pr=c.sales-c.pur-c.exp,r=qtyTable(E);
+ return `<div class="card"><label>${t("month")}</label><input id="mon" type="month" value="${mon}"><label>${t("who")}</label><select id="mf"><option value="all">${t("both")}</option>${names().map(([u,b])=>`<option value="${u}" ${mflt===u?'selected':''}>${esc(b.name)}</option>`).join("")}</select></div>
+ <div class="card grid"><div><div class="k">🟢 ${t("sales")}</div><div class="v">${fmt(c.sales)}</div></div><div><div class="k">🔴 ${t("pur")}</div><div class="v">${fmt(c.pur)}</div></div><div><div class="k">💸 ${t("exp")}</div><div class="v">${fmt(c.exp)}</div></div><div><div class="k">${t("profit")}</div><div class="v ${pr>=0?'pos':'neg'}">${fmt(pr)}</div></div></div>
+ <div class="card note">${t("flow")}: 💵 ${fmt(c.cash)} · 🏦 ${fmt(c.bank)}</div>
+ ${r.length?`<div class="card wrap"><table><tr><th>${t("item")}</th><th>🔴 ${t("bought")}</th><th>🟢 ${t("sold")}</th></tr>${r.map(x=>`<tr><td>${esc(x.n)}</td><td>${x.b}</td><td>${x.s}</td></tr>`).join("")}</table></div>`:`<p class="note">${t("none")}</p>`}`}
+function stockV(){const r=qtyTable(allE()),th=thr();
+ const box=`<div class="card"><label>⚠️ ${t("thr")}</label><input id="thr" type="number" inputmode="numeric" min="0" value="${th}"></div>`;
+ if(!r.length)return box+`<p class="note">${t("none")}</p>`;
+ const low=r.filter(x=>x.b-x.s<=th);
+ return box+(low.length?`<div class="card" style="border-color:var(--rd)"><b class="neg">⚠️ ${t("lowT")} (${low.length})</b><div class="note">${low.map(x=>esc(x.n)+": "+(x.b-x.s)).join(" · ")}</div></div>`:"")+
+ `<div class="card wrap"><table><tr><th>${t("item")}</th><th>🔴 ${t("bought")}</th><th>🟢 ${t("sold")}</th><th>📦 ${t("left")}</th></tr>${r.map(x=>`<tr class="${x.b-x.s<=th?'low':''}"><td>${esc(x.n)}</td><td>${x.b}</td><td>${x.s}</td><td><b class="${x.b-x.s<=th?'neg':'pos'}">${x.b-x.s}</b></td></tr>`).join("")}</table></div>`}
+const itemNames=()=>[...new Set(allE().filter(e=>e.item).map(e=>e.item.trim()))];
+function ledV(){const p=allP().find(x=>x.id===pSel);if(!p){pSel="";return partyV()}
+ const E=allE().filter(e=>e.party===pSel).sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.t||0)-(b.t||0));
+ let b=0;const rows=E.map(e=>{b+=delta(e);const pc=isSP(e.type)?fmt(pd(e)):"—";
+  return `<tr><td>${esc(e.date)}</td><td style="text-align:left">${lbl(e.type)}${e.item?"<br>"+esc(e.item)+" × "+(e.qty||0):""}</td><td>${fmt(e.amt)}</td><td>${pc}</td><td><b class="${b>0?'pos':b<0?'neg':''}">${fmt(Math.abs(b))}</b></td></tr>`}).join("");
+ return `<button class="s" data-lback="1" style="margin-bottom:10px">${t("back2")}</button>
+ <div class="card"><div class="v">${esc(p.name)} <span class="tag">${t("k_"+p.kind)}</span></div><div class="note">${p.phone?`<a href="tel:${esc(p.phone)}">📞 ${esc(p.phone)}</a> `:""}${esc(p.addr||"")}</div>
+ <div style="margin-top:8px"><b class="${b>0?'pos':b<0?'neg':''}">${b>0?t("toGet")+" "+fmt(b):b<0?t("toGive")+" "+fmt(-b):t("settled")}</b></div></div>
+ ${rows?`<div class="card wrap"><table><tr><th>${t("date")}</th><th style="text-align:left">${t("type")}</th><th>${t("amt")}</th><th>💵</th><th>${t("bal")}</th></tr>${rows}</table></div>`:`<p class="note">${t("none")}</p>`}`}
+function partyV(){if(pSel)return ledV();const [g,o]=dues(),E=allE();
+ const f=canWrite?`<div class="card"><b>${t("addP")}</b><input id="p_n" placeholder="${t("pn")}" maxlength="40"><input id="p_ph" type="tel" placeholder="${t("phone")}" maxlength="20"><input id="p_ad" placeholder="${t("addr")}" maxlength="100"><select id="p_k"><option value="customer">${t("k_customer")}</option><option value="wholesaler">${t("k_wholesaler")}</option><option value="supplier">${t("k_supplier")}</option></select><button class="p" id="p_sv">${t("save")}</button></div>`:"";
+ const rows=allP().sort((a,b)=>a.name.localeCompare(b.name)).map(p=>{const b=balOf(E.filter(e=>e.party===p.id));const own=isOwner()&&canWrite;
+  return `<div class="row"><div><b>${esc(p.name)}</b> <span class="tag">${t("k_"+p.kind)}</span><div class="note">${p.phone?`<a href="tel:${esc(p.phone)}">📞 ${esc(p.phone)}</a> `:""}${esc(p.addr||"")}</div></div><div style="text-align:right"><b class="${b>0?'pos':b<0?'neg':''}">${b>0?t("toGet")+" "+fmt(b):b<0?t("toGive")+" "+fmt(-b):t("settled")}</b>${isOwner()?`<div><button class="s" data-led="${p.id}">${t("led")}</button>${own?` <button class="s" data-dp="${p.id}" data-du="${p.uid}">${t("del")}</button>`:""}</div>`:""}</div></div>`}).join("");
+ return f+`<div class="card note">${t("totGet")}: <b class="pos">${fmt(g)}</b> · ${t("totGive")}: <b class="neg">${fmt(o)}</b></div>`+(rows?`<div class="card">${rows}</div>`:`<p class="note">${t("none")}</p>`)}
+function repV(){const td=today();if(!rf)rf=td.slice(0,8)+"01";if(!rt)rt=td;
+ const E=allE().filter(e=>(e.date||"")>=rf&&(e.date||"")<=rt),c=calc(E),pr=c.sales-c.pur-c.exp;
+ const days={};E.forEach(e=>{const d=days[e.date]=days[e.date]||{s:0,p:0,x:0},a=+e.amt||0;if(isS(e.type))d.s+=a;else if(e.type==="purchase")d.p+=a;else if(e.type==="expense")d.x+=a});
+ const dl=Object.entries(days).sort((a,b)=>b[0].localeCompare(a[0]));
+ const it={};E.filter(e=>isS(e.type)&&e.item).forEach(e=>{const k=e.item.trim().toLowerCase();it[k]=it[k]||{n:e.item.trim(),q:0,a:0};it[k].q+=(+e.qty||0);it[k].a+=(+e.amt||0)});
+ const top=Object.values(it).sort((a,b)=>b.q-a.q).slice(0,10);
+ const who=names().map(([u,b])=>[b.name,E.filter(e=>e.uid===u&&isS(e.type)).reduce((x,e)=>x+(+e.amt||0),0)]);
+ return `<div class="card"><label>${t("from")}</label><input id="r_f" type="date" value="${rf}"><label>${t("to")}</label><input id="r_t" type="date" value="${rt}"></div>
+ <div class="card grid"><div><div class="k">🟢 ${t("sales")}</div><div class="v">${fmt(c.sales)}</div></div><div><div class="k">🔴 ${t("pur")}</div><div class="v">${fmt(c.pur)}</div></div><div><div class="k">💸 ${t("exp")}</div><div class="v">${fmt(c.exp)}</div></div><div><div class="k">${t("profit")}</div><div class="v ${pr>=0?'pos':'neg'}">${fmt(pr)}</div></div></div>
+ <div class="card note">${t("flow")}: 💵 ${fmt(c.cash)} · 🏦 ${fmt(c.bank)}</div>
+ ${who.length?`<div class="card"><b>${t("byWho")}</b>${who.map(([n,s])=>`<div class="row"><span>${esc(n)}</span><b>${fmt(s)}</b></div>`).join("")}</div>`:""}
+ ${top.length?`<div class="card wrap"><b>🏆 ${t("topI")}</b><table><tr><th>${t("item")}</th><th>${t("pcs")}</th><th>${t("sales")}</th></tr>${top.map(x=>`<tr><td>${esc(x.n)}</td><td>${x.q}</td><td>${fmt(x.a)}</td></tr>`).join("")}</table></div>`:""}
+ ${dl.length?`<div class="card wrap"><b>📆 ${t("daily")}</b><table><tr><th>${t("date")}</th><th>🟢</th><th>🔴</th><th>💸</th></tr>${dl.map(([d,x])=>`<tr><td>${esc(d)}</td><td>${fmt(x.s)}</td><td>${fmt(x.p)}</td><td>${fmt(x.x)}</td></tr>`).join("")}</table></div>`:`<p class="note">${t("none")}</p>`}
+ ${E.length?`<button class="p" id="rexp">${t("csvR")}</button>`:""}`}
+function logV(){const a=Object.values(books).flatMap(b=>b.log||[]).sort((x,y)=>y.t-x.t).slice(0,150);if(!a.length)return `<p class="note">${t("none")}</p>`;
+ return `<div class="card">`+a.map(l=>`<div class="row"><div><b>${esc(l.by)}</b> ${t("a_"+l.a)}<div>${l.a==="edit"?sm(l.o)+" → "+sm(l.n):sm(l.a==="del"?l.o:l.n)}</div></div><div class="note">${new Date(l.t).toLocaleString(L==="bn"?"bn-BD":"en-GB",{dateStyle:"short",timeStyle:"short"})}</div></div>`).join("")+`</div>`}
+const COLORS=["#f6f7f9","#ffffff","#fef3c7","#fde68a","#fed7aa","#fecaca","#fbcfe8","#e9d5ff","#ddd6fe","#c7d2fe","#bfdbfe","#bae6fd","#a5f3fc","#99f6e4","#bbf7d0","#d9f99d","#e7e5e4","#d6d3d1","#cbd5e1","#94a3b8","#1e293b","#12161c","#0f2a24","#2a1f3d"];
+async function saveCsv(E,name){
+ try{const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';const rows=[["Date","Type","Item","Qty","Amount","Paid","Account","Party","By","Note"].map(q).join(",")];
+ E.slice().sort((a,b)=>(a.date||"").localeCompare(b.date||"")).forEach(e=>rows.push([e.date,t(e.type),e.item,e.qty,e.amt,pd(e),e.acct?t(e.acct):"",e.party?pname(e.party):"",e.pname,e.note].map(q).join(",")));
+ await DL.save({filename:name,data:new Blob(["\ufeff"+rows.join("\n")],{type:"text/csv;charset=utf-8"})})}catch(e){toast=t("noDl");render()}}
+async function doExport(id){const d=today();
+ if(id==="exj"){try{await DL.save({filename:"hisab-backup-"+d+".json",data:JSON.stringify(books,null,1)})}catch(e){toast=t("noDl");render()}}
+ else await saveCsv(allE(),"hisab-"+d+".csv")}
+function setBg(c){const r=document.documentElement;if(c)r.style.setProperty("--bg",c);else r.style.removeProperty("--bg");try{c?localStorage.setItem("hbg",c):localStorage.removeItem("hbg")}catch(e){}}
+function setV(){return `<div class="card"><b>${t("langT")}</b><button class="p" id="lg2" style="margin-top:8px">${t("lang")}</button></div><div class="card"><button class="p" id="out" style="background:var(--rd);border-color:var(--rd)">${t("out")}</button></div><div class="card"><b>${t("bgT")}</b><div style="display:flex;flex-wrap:wrap;gap:8px;margin:10px 0">${COLORS.map(c=>`<button data-bg="${c}" style="width:38px;height:38px;padding:0;background:${c};border:2px solid var(--bd)"></button>`).join("")}</div><input id="bgp" type="color" value="#f6f7f9" style="height:44px"><button class="s" data-bg="">${t("rst")}</button></div>${isOwner()?`<div class="card"><b>${t("sv")}</b><button class="p" id="exc" style="margin-top:8px">${t("exc")}</button><button class="p" id="exj" style="margin-top:8px">${t("exj")}</button></div>`:""}`}
+function form(){if(!canWrite)return `<div class="card">${t("viewOnly")}</div>`;
+ const e=editId?((books[editUid]||{}).entries||[]).find(x=>x.id===editId):null;const v=e||{type:addType||"sale_retail",acct:"cash",date:today(),amt:"",note:""};
+ return `<div class="card"><label>${t("type")}</label><select id="f_type">${formTypes().map(k=>`<option value="${k}" ${v.type===k?'selected':''}>${lbl(k)}</option>`).join("")}</select>
+ <div id="itw"><label>${t("item")}</label><input id="f_item" list="il" maxlength="40" value="${esc(v.item||"")}"><datalist id="il">${itemNames().map(n=>`<option value="${esc(n)}">`).join("")}</datalist><label>${t("qty")}</label><input id="f_qty" type="number" inputmode="numeric" min="0" value="${esc(v.qty||"")}"></div>
+ <label>${t("amt")}</label><input id="f_amt" type="number" inputmode="decimal" min="0" value="${esc(v.amt)}">
+ <div id="ptw"><label>${t("prt")}</label><select id="f_party"><option value="">—</option>${allP().map(p=>`<option value="${p.id}" ${v.party===p.id?'selected':''}>${esc(p.name)} (${t("k_"+p.kind)})</option>`).join("")}</select><div id="pdw"><label>${t("paid")}</label><input id="f_paid" type="number" inputmode="decimal" min="0" value="${v.paid===undefined?'':esc(v.paid)}"></div></div>
+ <div id="acw"><label>${t("acct")}</label><select id="f_acct"><option value="cash" ${v.acct==="cash"?'selected':''}>${t("cash")}</option><option value="bank" ${v.acct==="bank"?'selected':''}>${t("bank")}</option></select></div>
+ <label>${t("date")}</label><input id="f_date" type="date" value="${esc(v.date)}">
+ <label>${t("note")}</label><input id="f_note" maxlength="120" value="${esc(v.note)}">
+ ${assets?`<label>📷 ${t("photo")}</label><input id="f_img" type="file" accept="image/*">${v.thumb?`<img class="th" src="${v.thumb}">`:""}`:""}
+ <button class="p" id="sv" style="margin-top:8px">${editId?t("upd"):t("save")}</button>${editId?`<button class="s" id="cx" style="margin-top:8px">${t("cancel")}</button>`:""}</div>`}
+function syncForm(){const ty=document.getElementById("f_type").value;const g=(i,s)=>{const x=document.getElementById(i);if(x)x.style.display=s?"":"none"};
+ g("itw",isSP(ty));g("ptw",isSP(ty)||ty==="recv"||ty==="pay");g("pdw",isSP(ty));g("acw",ty!=="deposit"&&ty!=="withdraw")}
+function hist(ty){let E=allE().filter(e=>ty.includes(e.type));if(flt==="mine")E=E.filter(e=>e.uid===me);
+ const tot=E.reduce((a,e)=>a+(+e.amt||0),0),tq=E.reduce((a,e)=>a+(+e.qty||0),0);
+ E.sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.t||0)-(a.t||0));
+ const f=`<select id="flt"><option value="all" ${flt==="all"?'selected':''}>${t("all")}</option><option value="mine" ${flt==="mine"?'selected':''}>${t("mine")}</option></select>`;
+ if(!E.length)return f+`<p class="note">${t("none")}</p>`;
+ return f+`<div class="card"><b>${t("ltot")}: ${fmt(tot)}${tq?" · "+tq+" "+t("pcs"):""}</b></div><div class="card">`+E.slice(0,300).map(e=>{const own=isOwner()&&canWrite;const out=["purchase","expense","pay"].includes(e.type);const pr=pd(e);
+  return `<div class="row"><div><span class="tag">${lbl(e.type)}</span> <span class="note">${t(e.acct)} · ${esc(e.date)} · ${esc(e.pname)}</span><div>${e.item?`<b>${esc(e.item)}</b> × ${esc(e.qty||0)} ${t("pcs")} `:""}${e.party?`👤 ${esc(pname(e.party))} `:""}${esc(e.note)}</div>${e.paid!==undefined&&e.paid!==""&&pr<(+e.amt)?`<div class="note">💵 ${fmt(pr)} · ${t(isS(e.type)?"toGet":"toGive")} ${fmt(e.amt-pr)}</div>`:""}${e.img?`<img class="th" data-img="${e.img}" src="${e.thumb||''}">`:""}</div>
+  <div style="text-align:right"><b class="${out?'neg':'pos'}">${fmt(e.amt)}</b><div>${own?`<button class="s" data-ed="${e.id}" data-eu="${e.uid}">${t("edit")}</button> <button class="s" data-dl="${e.id}" data-du="${e.uid}">${t("del")}</button>`:`<span class="note">${t("ro")}</span>`}</div></div></div>`}).join("")+`</div>`}
+function render(){document.getElementById("ttl").textContent=t("app");document.getElementById("lg").textContent=t("lang");
+ document.getElementById("nav").innerHTML=navList().map(([k,e])=>`<button class="${tab===k?'on':''}" data-t="${k}">${e}<br><span style="font-size:15px;font-weight:700">${t(k==="add"?"newS":k==="month"?"monthS":k)}</span></button>`).join("");
+ const app=document.getElementById("app");const gg=gate();if(gg!==null){document.getElementById("nav").innerHTML="";app.innerHTML=gg;return}if(!loaded)return;
+ if(me&&!(books[me]&&books[me].name)){app.innerHTML=`<div class="card"><label>${t("yourName")}</label><input id="nm" maxlength="30" placeholder="MOSTAFIJ / MASUD"><button class="p" id="nmb">${t("go")}</button></div>`;return}
+ app.innerHTML=tab==="dash"?dash():tab==="add"?form():tab==="stock"?stockV():tab==="month"?monthV():tab==="party"?partyV():tab==="log"?logV():tab==="set"?setV():tab==="home"?homeV():tab==="req"?reqV():tab==="emp"?empV():tab==="rep"?repV():tab==="hall"?hist(formTypesAll()):hist(LST[tab]);
+ if(tab==="add"&&canWrite)syncForm();
+ if(toast)app.insertAdjacentHTML("afterbegin",`<div class="card note">${toast}</div>`)}
+function compress(f){return new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);c.toBlob(b=>b?ok(b):no(),"image/jpeg",.6)};im.onerror=no;im.src=r.result};r.onerror=no;r.readAsDataURL(f)})}
+async function mutate(uid,fn){const b=books[uid]||{name:"",entries:[],parties:[],log:[]};
+ const next={name:b.name,entries:[...(b.entries||[])],parties:[...(b.parties||[])],log:[...(b.log||[])]};
+ const lg=(a,o,n)=>{next.log.push({t:Date.now(),by:(books[me]||{}).name||"?",a,o:o||null,n:n||null})};
+ fn(next,lg);
+ try{const bt=db.batch(),sync=(col,oldL,newL)=>{const ids=new Set(newL.map(x=>x.id));oldL.forEach(x=>{if(!ids.has(x.id))bt.delete(db.collection(col).doc(x.id))});
+   newL.forEach(x=>{const o=oldL.find(y=>y.id===x.id);if(!o||JSON.stringify(o)!==JSON.stringify(x))bt.set(db.collection(col).doc(x.id),{...x,uid})})};
+  sync("entries",b.entries||[],next.entries);sync("parties",b.parties||[],next.parties);
+  next.log.slice((b.log||[]).length).forEach(l=>bt.set(db.collection("logs").doc(),{...l,uid}));
+  if(next.name!==b.name)bt.set(db.collection("users").doc(uid),{name:next.name},{merge:true});
+  await bt.commit();notify(next,b)}catch(e){console.log(e);toast=t("err");render();return false}return true}
+document.addEventListener("click",async ev=>{const el=ev.target.closest("button");if(!el)return;
+ if(el.id==="out"){auth.signOut().then(()=>location.reload());return}
+ if(el.id==="exc"||el.id==="exj"){await doExport(el.id);return}
+ if(el.id==="rexp"){await saveCsv(allE().filter(e=>(e.date||"")>=rf&&(e.date||"")<=rt),"hisab-report-"+rf+"_"+rt+".csv");return}
+ if(el.dataset.bg!==undefined){setBg(el.dataset.bg);return}
+ if(el.id==="lg"||el.id==="lg2"){L=L==="bn"?"en":"bn";try{localStorage.setItem("hl",L)}catch(e){}toast="";render();return}
+ if(el.dataset.t){tab=el.dataset.t;editId=null;pSel="";toast="";render();return}
+ if(el.dataset.led){pSel=el.dataset.led;render();return}
+ if(el.dataset.lback!==undefined){pSel="";render();return}
+ if(el.dataset.p!==undefined){sel=el.dataset.p;render();return}
+ if(el.id==="nmb"){const n=document.getElementById("nm").value.trim();if(n)await mutate(me,x=>{x.name=n});return}
+ if(el.id==="cx"){editId=null;render();return}
+ if(el.dataset.ed){editId=el.dataset.ed;editUid=el.dataset.eu;tab="add";render();return}
+ if(el.dataset.dl){if(confirm(t("sure")))await mutate(el.dataset.du,(x,lg)=>{const o=x.entries.find(e=>e.id===el.dataset.dl);x.entries=x.entries.filter(e=>e.id!==el.dataset.dl);lg("del",o)});return}
+ if(el.dataset.dp){if(confirm(t("sure")))await mutate(el.dataset.du,x=>{x.parties=x.parties.filter(p=>p.id!==el.dataset.dp)});return}
+ if(el.id==="p_sv"){const n=document.getElementById("p_n").value.trim();if(!n)return;
+  await mutate(me,x=>{x.parties.push({id:"p"+Date.now().toString(36)+Math.random().toString(36).slice(2,4),name:n,phone:document.getElementById("p_ph").value.trim(),addr:document.getElementById("p_ad").value.trim(),kind:document.getElementById("p_k").value})});return}
+ if(el.id==="sv"){const type=document.getElementById("f_type").value,amt=parseFloat(document.getElementById("f_amt").value);if(!(amt>0))return;
+  const party=document.getElementById("f_party").value;if((type==="recv"||type==="pay")&&!party){toast=t("needP");render();return}
+  const old=editId?((books[editUid]||{}).entries||[]).find(x=>x.id===editId):null;
+  const ent={id:editId||("e"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)),t:Date.now(),type,amt,acct:document.getElementById("f_acct").value,date:document.getElementById("f_date").value||today(),note:document.getElementById("f_note").value.trim()};
+  if(isSP(type)){ent.item=document.getElementById("f_item").value.trim();ent.qty=parseInt(document.getElementById("f_qty").value)||0;const pv=document.getElementById("f_paid").value;if(pv!=="")ent.paid=parseFloat(pv)}
+  if(party&&(isSP(type)||type==="recv"||type==="pay"))ent.party=party;
+  if(old&&old.img){ent.img=old.img;if(old.thumb)ent.thumb=old.thumb}
+  const fi=document.getElementById("f_img");
+  if(fi&&fi.files[0]){el.textContent=t("up");el.disabled=true;try{const r=await assets.upload(await compress(fi.files[0]));ent.img=r.id;ent.thumb=r.thumb}catch(e){toast=t("err");el.disabled=false;render();return}}
+  const uid=editId?editUid:me;
+  const ok=await mutate(uid,(x,lg)=>{if(editId){x.entries=x.entries.map(e=>e.id===editId?ent:e);lg("edit",old,ent)}else{x.entries.push(ent);lg("add",null,ent)}});
+  if(ok){editId=null;addType="";toast=t("saved");tab=isS(type)?"sell":type==="purchase"?"buy":"other";render()}}
+});
+document.addEventListener("input",ev=>{if(ev.target.id==="bgp")setBg(ev.target.value)});
+document.addEventListener("change",ev=>{const i=ev.target.id;
+ if(i==="mon"&&ev.target.value){mon=ev.target.value;render()}if(i==="mf"){mflt=ev.target.value;render()}
+ if(i==="r_f"&&ev.target.value){rf=ev.target.value;render()}if(i==="r_t"&&ev.target.value){rt=ev.target.value;render()}
+ if(i==="thr"){try{localStorage.setItem("hlow",String(Math.max(0,parseInt(ev.target.value)||0)))}catch(e){}render()}
+ if(i==="flt"){flt=ev.target.value;render()}if(i==="f_type")syncForm()});
+
+Object.assign(T.bn,{app:"Clothing Faster Business",who2:"আপনি কে?",owner:"মালিক",employee:"কর্মচারী",ownerD:"দোকান, মাল ও হিসাব চালান",empD:"বিক্রি, কেনা ও স্টকের কাজ করুন",ownerLogin:"মালিক লগইন",empLogin:"কর্মচারী লগইন",nm:"নাম",mob:"মোবাইল নম্বর",addr2:"ঠিকানা",pw2:"পাসওয়ার্ড",contOwner:"মালিক হিসেবে চালু করুন",sendReq:"অনুমতির জন্য অনুরোধ পাঠান",needOwner:"মালিকের অনুমতি লাগবে",haveAcc:"আগে অ্যাকাউন্ট খুলেছেন? লগইন করুন",back:"← ফিরে যান",pleaseWait:"অপেক্ষা করুন…",sentOwner:"আপনার অনুরোধ মালিকের কাছে গেছে",pending:"অপেক্ষমান",chk:"মালিক অনুমতি দিয়েছেন কিনা দেখুন",notYet:"এখনও অনুমতি পাননি",rejd:"মালিক অনুমতি দেননি। মালিকের সাথে কথা বলুন।",welcomeO:"স্বাগতম, মালিক",welcomeBack:"আবার স্বাগতম, লগইন করুন",unlock:"আনলক / লগইন",onlyPw:"মালিকের শুধু পাসওয়ার্ড লাগে",secure:"নিরাপত্তার জন্য প্রতিবার লগইন করতে হবে",switchP:"অন্য ব্যক্তি / নতুন ডিভাইস",accept:"অনুমতি দিন",reject:"না দিন",stop:"বন্ধ করুন",reopen:"আবার চালু করুন",hello:"হ্যালো",empDash:"কর্মচারীর ড্যাশবোর্ড",todaySales:"আজকের বিক্রি",todayBuy:"আজকের কেনা",mySales:"আমার বিক্রির তালিকা",items:"টি",totalS:"টি বিক্রি",viewAll:"সব দেখুন",addSale:"নতুন বিক্রি লিখুন",addBuy:"নতুন কেনা লিখুন",myHist:"আমার হিসাব দেখুন",home:"হোম",req:"অনুমতি",pendT:"অপেক্ষমান",apprT:"চালু",rejT:"বন্ধ",newReq:"নতুন অনুরোধ আছে",notOwner:"এই নম্বর মালিক হিসেবে অনুমোদিত নয়",regErr:"অ্যাকাউন্ট খোলা যায়নি। নম্বর আগে ব্যবহার হয়েছে বা পাসওয়ার্ড ৬ অক্ষরের কম।",regErr0:"নাম, মোবাইল নম্বর (১০+ অঙ্ক) আর ৬+ অক্ষরের পাসওয়ার্ড দিন",noEmp:"কোনো কর্মচারী নেই",setupT:"প্রথমবার সেটআপ",setupD:"এই অ্যাপ এখনও Firebase-এর সাথে যুক্ত না। config.js ফাইলে firebaseConfig বসান, অথবা নিচে পুরোটা কপি করে বসান।"});
+Object.assign(T.en,{app:"Clothing Faster Business",who2:"Who are you?",owner:"Owner",employee:"Employee",ownerD:"Manage store, products and orders",empD:"Work on tasks, stock and sales",ownerLogin:"Owner Login",empLogin:"Employee Login",nm:"Name",mob:"Mobile Number",addr2:"Address",pw2:"Password",contOwner:"Continue as Owner",sendReq:"Send Request for Permission",needOwner:"Requires owner approval",haveAcc:"Already have an account? Log in",back:"← Back",pleaseWait:"Please Wait…",sentOwner:"Your request was sent to the Owner",pending:"Pending",chk:"Check if Owner Accepted?",notYet:"Not approved yet",rejd:"The owner did not approve. Please talk to the owner.",welcomeO:"Welcome Owner",welcomeBack:"Welcome Back, Please Login.",unlock:"Unlock / Login",onlyPw:"Only password needed for Owner",secure:"Login every time for security",switchP:"Another person / new device",accept:"Accept",reject:"Reject",stop:"Disable",reopen:"Enable again",hello:"Hello",empDash:"Employee Dashboard",todaySales:"Today's Sales",todayBuy:"Today's Purchase",mySales:"My Sales List",items:"items",totalS:"total sales",viewAll:"View all",addSale:"Add New Sale",addBuy:"Add New Purchase",myHist:"View My History",home:"Home",req:"Access",pendT:"Pending",apprT:"Active",rejT:"Disabled",newReq:"New requests waiting",notOwner:"This number is not approved as owner",regErr:"Could not create account. Number already used or password under 6 characters.",regErr0:"Enter name, mobile number (10+ digits) and a password of 6+ characters",noEmp:"No employees",setupT:"First-time setup",setupD:"Paste your full Firebase firebaseConfig (or put it in config.js)."});
+const MAIL={key:"j3V44iBdbLuirAa2K",service:"service_xgixgsm",tpl:"template_vtiw8uo"};
+const bs=x=>x?`${T.bn[x.type]} ${x.amt}৳${x.item?" · "+x.item+"×"+(x.qty||0):""}${x.party?" · "+pname(x.party):""}`:"";
+function sendMail(who,txt){if(typeof emailjs==="undefined")return;emailjs.send(MAIL.service,MAIL.tpl,{user_name:who,action_details:txt,time:new Date().toLocaleString("bn-BD")}).catch(e=>console.log("mail",e))}
+function notify(next,b){const who=(books[me]||{}).name||"?",m=[];
+ next.log.slice((b.log||[]).length).forEach(l=>m.push(l.a==="edit"?`বদলেছেন: ${bs(l.o)} → ${bs(l.n)}`:l.a==="del"?`মুছেছেন: ${bs(l.o)}`:`যোগ করেছেন: ${bs(l.n)}`));
+ const op=new Set((b.parties||[]).map(p=>p.id)),np=new Set(next.parties.map(p=>p.id));
+ next.parties.filter(p=>!op.has(p.id)).forEach(p=>m.push("নতুন পার্টি: "+p.name));(b.parties||[]).filter(p=>!np.has(p.id)).forEach(p=>m.push("পার্টি মুছেছেন: "+p.name));
+ if(m.length)sendMail(who,m.join("\n"))}
+let firebaseConfig=(window.FIREBASE_CONFIG&&window.FIREBASE_CONFIG.apiKey&&!/PASTE/.test(window.FIREBASE_CONFIG.apiKey))?window.FIREBASE_CONFIG:{apiKey:"PASTE_API_KEY"};
+try{const c=JSON.parse(localStorage.getItem("fbcfg")||"null");if(/PASTE/.test(firebaseConfig.apiKey)&&c&&c.apiKey&&c.projectId)firebaseConfig=c}catch(e){}
+function saveCfg(){const txt=document.getElementById("cfgtxt").value,c={};let m;const re=/(\w+)\s*:\s*["']([^"']*)["']/g;while((m=re.exec(txt)))c[m[1]]=m[2];
+ if(!c.apiKey||!c.projectId){alert("apiKey / projectId পাওয়া যায়নি");return}
+ try{localStorage.setItem("fbcfg",JSON.stringify(c))}catch(e){}location.reload()}
+const rget=k=>{try{return localStorage.getItem(k)||""}catch(e){return""}},rset=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+const MASTER="owner@hisab.app";
+const mail=p=>p==="MASTER"?MASTER:String(p).replace(/\D/g,"")+"@hisab.app";
+const isMaster=()=>!!auth&&!!auth.currentUser&&auth.currentUser.email===MASTER;
+let ROLE=rget("hrole"),scr=rget("hrole")?"login":"role",pr="",pendPhoto="",myUser=null,started=false,got=0,need=4,auth=null,authed=false,addType="",unMe=null,S={entries:[],parties:[],logs:[],users:{},uinfo:{},pay:{}},empSel="",emon="";
+const isOwner=()=>!!myUser&&myUser.role==="owner";
+const formTypes=()=>isOwner()?TYPES:["sale_retail","sale_wholesale","purchase","expense"];
+const formTypesAll=()=>TYPES;
+const EMPNAV=[["home","🏠"],["sell","🟢"],["buy","🔴"],["set","⚙️"]];
+const navList=()=>isOwner()?NAV.slice(0,-1).concat([["rep","📈"],["emp","🧑‍💼"]],isMaster()?[["req","🛂"]]:[],NAV.slice(-1)):EMPNAV;
+const DL={save:async({filename,data})=>{const b=data instanceof Blob?data:new Blob([data],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=filename;document.body.appendChild(a);a.click();a.remove()}};
+const rd=b=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(b)});
+function thumbOf(b,mx=120,q=.5){return rd(b).then(u=>new Promise((ok,no)=>{const im=new Image();im.onload=()=>{const s=Math.min(1,mx/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);ok(c.toDataURL("image/jpeg",q))};im.onerror=no;im.src=u}))}
+function rebuild(){books={};Object.entries(S.users).forEach(([u,n])=>books[u]={name:n,entries:[],parties:[],log:[]});
+ const g=u=>books[u]||(books[u]={name:"",entries:[],parties:[],log:[]});
+ S.entries.forEach(e=>g(e.uid).entries.push(e));S.parties.forEach(p=>g(p.uid).parties.push(p));S.logs.forEach(l=>g(l.uid).log.push(l));if(me)g(me)}
+function ready(){rebuild();if(++got>=need)loaded=true;render()}
+function start(){if(started){render();return}started=true;tab=isOwner()?"dash":"home";need=isOwner()?5:2;
+ const sub=(q,fn)=>q.onSnapshot(s=>{fn(s);ready()},e=>{console.log(e);toast=t("err");loaded=true;render()});
+ if(isOwner()){
+  sub(db.collection("users"),s=>{S.users={};S.uinfo={};s.docs.forEach(d=>{const x=d.data()||{};S.users[d.id]=x.name||"";S.uinfo[d.id]=x})});
+  sub(db.collection("entries"),s=>{S.entries=s.docs.map(d=>d.data())});sub(db.collection("parties"),s=>{S.parties=s.docs.map(d=>d.data())});sub(db.collection("logs"),s=>{S.logs=s.docs.map(d=>d.data())});sub(db.collection("payroll"),s=>{S.pay={};s.docs.forEach(d=>{S.pay[d.id]=d.data()||{}})})
+ }else{S.users={[me]:myUser.name||""};
+  sub(db.collection("entries").where("uid","==",me),s=>{S.entries=s.docs.map(d=>d.data())});sub(db.collection("parties"),s=>{S.parties=s.docs.map(d=>d.data())})}}
+function watchMe(){if(unMe)unMe();unMe=db.collection("users").doc(me).onSnapshot(d=>{if(!d.exists){if(isMaster())db.collection("users").doc(me).set({name:"MOSTAFIJ",phone:"",address:"",photo:"",role:"owner",status:"approved",t:Date.now()}).catch(e=>console.log(e));return}myUser=d.data();rset("hrole",myUser.role);rset("hname",myUser.name||"");if(myUser.photo)rset("hphoto",myUser.photo);
+  if(myUser.status==="approved")start();else render()},e=>console.log(e))}
+const gmsg=x=>{const e=document.getElementById("gerr");if(e)e.textContent=x};
+const brand='<div class="ctr"><b>Clothing Faster Business</b></div>';
+function roleH(){const c=(k,ic,ro)=>`<div class="card"><div style="display:flex;gap:14px;align-items:center"><div class="av" style="display:flex;align-items:center;justify-content:center;background:var(--ac);color:#fff;font-size:28px">${ic}</div><div><div class="v">${t(k)}</div><div class="note">${t(k==="owner"?"ownerD":"empD")}</div></div></div><button class="p" style="margin-top:12px" data-role="${ro}">${k==="owner"?t("contOwner"):(L==="bn"?"কর্মচারী হিসেবে চালু করুন":"Continue as Employee")}</button></div>`;
+ return `${brand}<h2 class="ctr">${t("who2")}</h2><div class="card" style="border:2px solid var(--ac)"><div style="display:flex;gap:14px;align-items:center"><div class="av" style="display:flex;align-items:center;justify-content:center;background:var(--ac);color:#fff;font-size:28px">👑</div><div><div class="v">${t("masterT")}</div><div class="note">${t("masterD")}</div></div></div><button class="p" style="margin-top:12px" data-scr="master">${t("masterB")}</button></div>${c("owner","👑","owner")}${c("employee","👤","employee")}`}
+function masterH(){return `${brand}<h2 class="ctr">${t("welcomeO")}</h2><div class="card"><label>${t("pw2")}</label><input id="l_p" type="password" autocomplete="current-password"><div class="err" id="gerr"></div><button class="p" id="lgin2">${t("unlock")}</button><p class="note ctr">${t("onlyPw")}</p></div><div class="ctr"><button class="s" data-scr="role">${t("back")}</button></div>`}
+function regH(){const o=(pr||ROLE)==="owner";
+ return `${brand}<h2 class="ctr">${t(o?"ownerLogin":"empLogin")}</h2><div class="card"><div class="phc"><img id="phprev" class="av big" src="${pendPhoto}"><span>📷</span><input id="r_ph" type="file" accept="image/*" style="position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;margin:0;padding:0;border:0;cursor:pointer"></div>
+ <label>${t("nm")}</label><input id="r_n" maxlength="30"><label>${t("mob")}</label><input id="r_m" type="tel" inputmode="numeric" maxlength="15" placeholder="01XXXXXXXXX"><label>${t("addr2")}</label><input id="r_a" maxlength="100"><label>${t("pw2")}</label><input id="r_p" type="password" autocomplete="new-password">
+ <div class="err" id="gerr"></div><button class="p" id="regb">${t("sendReq")}</button><p class="note ctr">${t("needOwner")}</p></div>
+ <div class="ctr"><button class="s" data-scr="login2">${t("haveAcc")}</button> <button class="s" data-scr="role">${t("back")}</button></div>`}
+function loginH(){const ph=rget("hphone"),full=!ph||scr==="login2",o=(ROLE||rget("hrole"))==="owner",nm=rget("hname"),im=rget("hphoto");
+ const head=full?`<h2 class="ctr">${t("lgin")}</h2>`:o?`<h2 class="ctr">${t("welcomeO")}</h2><div class="ctr"><img class="av big" src="${im}"><div class="v">${esc(nm)}</div></div>`:`<h2 class="ctr">${t("welcomeBack")}</h2><div class="ctr"><img class="av big" src="${im}"><div class="v">${esc(nm)}</div></div>`;
+ return `${brand}${head}<div class="card">${full||!o?`<label>${t("mob")}</label><input id="l_m" type="tel" inputmode="numeric" value="${esc(ph)}" placeholder="01XXXXXXXXX">`:""}<label>${t("pw2")}</label><input id="l_p" type="password" autocomplete="current-password"><div class="err" id="gerr"></div><button class="p" id="lgin2">${o&&!full?t("unlock"):t("lgin")}</button><p class="note ctr">${o&&!full?t("onlyPw"):t("secure")}</p></div><div class="ctr"><button class="s" data-sw="1">${t("switchP")}</button></div>`}
+function waitH(){return `${brand}<h2 class="ctr">${t("pleaseWait")}</h2><p class="ctr">${t("sentOwner")}</p><div class="ctr"><img class="av big" src="${myUser.photo||""}"><div class="v">${esc(myUser.name)}</div><p><span class="tag" style="background:#fde68a;color:#7a5200">• ${t("pending")}</span></p></div><div class="err ctr" id="gerr"></div><button class="p" id="chk">${t("chk")}</button><div class="ctr" style="margin-top:12px"><button class="s" id="out">${t("out")}</button></div>`}
+function rejH(){return `${brand}<h2 class="ctr">${t("rejT")}</h2><p class="ctr">${t("rejd")}</p><div class="ctr"><button class="s" id="chk">${t("chk")}</button> <button class="s" id="out">${t("out")}</button></div><div class="err ctr" id="gerr"></div>`}
+function setupHtml(){return '<div class="card"><b>⚠️ '+t("setupT")+'</b><p class="note">'+t("setupD")+'</p><textarea id="cfgtxt" rows="8" style="width:100%;font:13px monospace;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:8px" placeholder="const firebaseConfig = { apiKey: ..., projectId: ... };"></textarea><button class="p" style="margin-top:8px" onclick="saveCfg()">OK</button></div>'}
+function gate(){if(!auth)return setupHtml();if(!authed){return scr==="role"?roleH():scr==="reg"?regH():scr==="master"?masterH():loginH()}
+ if(!myUser)return `<p class="note">…</p>`;if(myUser.status==="pending")return waitH();if(myUser.status==="rejected")return rejH();return null}
+function homeV(){const E=allE().filter(e=>e.uid===me),td=today(),sum=a=>a.reduce((x,e)=>x+(+e.amt||0),0);
+ const ts=E.filter(e=>isS(e.type)&&e.date===td),tp=E.filter(e=>e.type==="purchase"&&e.date===td),al=E.filter(e=>isS(e.type));
+ return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px"><div><div class="v" style="font-size:26px">${t("hello")} ${esc(myUser.name)},</div><div class="note">${t("empDash")}</div></div><img class="av hd" src="${myUser.photo||""}"></div>
+ <div class="card"><b>🛍️ ${t("todaySales")}</b><div class="note">${ts.length} ${t("items")} - ${fmt(sum(ts))}</div></div>
+ <div class="card"><b>📦 ${t("todayBuy")}</b><div class="note">${tp.length} ${t("items")} - ${fmt(sum(tp))}</div></div>
+ <div class="card"><b>📋 ${t("mySales")}</b><div class="note">${al.length} ${t("totalS")}</div><button class="s" data-t="sell" style="margin-top:6px">${t("viewAll")} →</button></div>
+ <button class="p" style="margin-bottom:10px" data-go="sale_retail">➕ ${t("addSale")}</button><button class="p" style="margin-bottom:10px" data-go="purchase">➕ ${t("addBuy")}</button><button class="p" style="margin-bottom:10px" data-go="expense">➕ ${t("addExp")}</button><button class="p" data-t="hall">🕒 ${t("myHist")}</button>`}
+function reqV(){const E=Object.entries(S.uinfo).filter(([u,x])=>u!==me&&x.role).sort((a,b)=>(b[1].t||0)-(a[1].t||0));
+ const grp=(st,title,btns)=>{const l=E.filter(([,x])=>x.status===st);return l.length?`<div class="k" style="margin:12px 0 6px">${title} (${l.length})</div>`+l.map(([u,x])=>`<div class="card"><div style="display:flex;gap:12px;align-items:center"><img class="av" src="${x.photo||""}"><div><b>${esc(x.name)}</b> <span class="tag">${t(x.role==="owner"?"owner":"employee")}</span><div class="note">📞 ${esc(x.phone)}</div><div class="note">📍 ${esc(x.address||"")}</div></div></div><div style="display:flex;gap:8px;margin-top:10px">${btns(u)}</div></div>`).join(""):""};
+ const b=(u,st,cl,lb)=>`<button class="${cl}" style="flex:1" data-ap="${u}" data-st="${st}">${t(lb)}</button>`;
+ return (grp("pending",t("pendT"),u=>b(u,"approved","g","accept")+b(u,"rejected","r","reject"))+grp("approved",t("apprT"),u=>b(u,"rejected","r","stop"))+grp("rejected",t("rejT"),u=>b(u,"approved","g","reopen")))||`<p class="note">${t("noEmp")}</p>`}
+{const _d0=dash;dash=()=>{const n=isMaster()?Object.values(S.uinfo).filter(x=>x.status==="pending").length:0,lo=isOwner()?lowItems().length:0;
+ return (n?`<button class="p" style="margin-bottom:12px;background:var(--rd);border-color:var(--rd)" data-t="req">🛂 ${t("newReq")} (${n})</button>`:"")+(lo?`<button class="p" style="margin-bottom:12px;background:var(--rd);border-color:var(--rd)" data-t="stock">⚠️ ${t("lowA")} (${lo})</button>`:"")+_d0()}}
+const errMsg=e=>{const c=(e&&e.code)||"",m=(e&&e.message)||"";return c==="auth/email-already-in-use"||c==="auth/wrong-password"||c==="auth/invalid-credential"||c==="auth/invalid-login-credentials"?t("usedNo"):c==="auth/weak-password"?t("weakPw"):c==="auth/operation-not-allowed"?t("noEP"):(c==="permission-denied"||/permission/i.test(m))?t("noRules"):c==="auth/network-request-failed"?t("noNet"):/api-key/i.test(c)?t("badKey"):t("regErr")+" ["+(c||m||"?")+"]"};
+async function doReg(){const g=i=>document.getElementById(i).value.trim(),name=g("r_n"),phone=g("r_m").replace(/\D/g,""),addr=g("r_a"),pw=document.getElementById("r_p").value,role=pr||ROLE;
+ if(!name||phone.length<10||pw.length<6){gmsg(t("regErr0"));return}
+ gmsg("…");let cu=null,fresh=false;
+ try{
+  try{cu=(await auth.createUserWithEmailAndPassword(mail(phone),pw)).user;fresh=true}
+  catch(e){if(e.code==="auth/email-already-in-use"){cu=(await auth.signInWithEmailAndPassword(mail(phone),pw)).user;const ex=await db.collection("users").doc(cu.uid).get();if(ex.exists){rset("hrole",ex.data().role);rset("hphone",phone);rset("hname",ex.data().name||"");return}}else throw e}
+  await db.collection("users").doc(cu.uid).set({name,phone,address:addr,photo:pendPhoto||"",role,status:"pending",t:Date.now()})}
+ catch(e){console.log(e);if(cu&&fresh){try{await cu.delete()}catch(x){}}setTimeout(()=>gmsg(errMsg(e)),400);return}
+ rset("hrole",role);rset("hphone",phone);rset("hname",name);if(pendPhoto)rset("hphoto",pendPhoto);
+ sendMail(name,"নতুন "+(role==="owner"?"মালিকের":"কর্মচারীর")+" অনুরোধ: "+name+" · ফোন "+phone+" · "+addr)}
+async function doLogin(){const ph=rget("hphone"),el=document.getElementById("l_m");let phone=scr==="master"?"MASTER":((el?el.value:ph).replace(/\D/g,"")||ph);const pw=document.getElementById("l_p").value;
+ if(!phone||!pw)return;gmsg("…");
+ try{await auth.signInWithEmailAndPassword(mail(phone),pw);rset("hphone",phone);if(phone==="MASTER"){rset("hrole","owner");rset("hname","MOSTAFIJ")}}catch(e){gmsg(phone==="MASTER"?t("wrongM"):t("wrong"))}}
+document.addEventListener("click",async ev=>{const el=ev.target.closest("button");if(!el)return;const d=el.dataset;
+ if(d.role){pr=d.role;ROLE=d.role;scr="reg";render();return}
+ if(d.scr){scr=d.scr;render();return}
+ if(d.sw!==undefined){["hrole","hphone","hname","hphoto"].forEach(k=>rset(k,""));ROLE="";scr="role";if(authed&&auth){auth.signOut().then(()=>location.reload());return}render();return}
+ if(el.id==="regb"){await doReg();return}
+ if(el.id==="lgin2"){await doLogin();return}
+ if(el.id==="chk"){try{const x=await db.collection("users").doc(me).get();if(x.exists){myUser=x.data();if(myUser.status==="approved")start();else{render();gmsg(t("notYet"))}}}catch(e){gmsg(t("err"))}return}
+ if(d.ap){try{await db.collection("users").doc(d.ap).update({status:d.st})}catch(e){toast=t("err");render()}return}
+ if(d.go){addType=d.go;tab="add";editId=null;render();return}
+});
+document.addEventListener("change",async ev=>{if(ev.target.id==="r_ph"&&ev.target.files[0]){try{pendPhoto=await thumbOf(ev.target.files[0],200,.6);const p=document.getElementById("phprev");if(p)p.src=pendPhoto}catch(e){}}});
+document.addEventListener("click",async ev=>{const im=ev.target.closest("img[data-img]");if(!im)return;
+ const d=await db.collection("photos").doc(im.dataset.img).get();if(!d.exists)return;
+ const o=document.createElement("div");o.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:99;display:flex;align-items:center;justify-content:center;padding:10px";
+ o.innerHTML='<img style="max-width:100%;max-height:100%" src="'+d.data().full+'">';o.onclick=()=>o.remove();document.body.appendChild(o)});
+Object.assign(T.bn,{emp:"কর্মচারী",addExp:"নতুন খরচ লিখুন",sal:"মাসিক বেতন (টাকা)",saveSal:"বেতন ঠিক করুন",present:"✅ হাজির",workDays:"কাজের দিন",entDays:"এন্ট্রি দিয়েছেন (দিন)",payNow:"💵 বেতন দিলাম",paidM:"এই মাসে দেওয়া",paidAll:"মোট দেওয়া",dueSal:"বাকি বেতন",since:"যোগ দিয়েছেন",allTime:"সব মিলিয়ে",attAdd:"হাজিরা",payList:"বেতন দেওয়ার তালিকা",noEmpA:"কোনো চালু কর্মচারী নেই",backL:"← তালিকায় ফিরুন",cnt:"টি",salaryT:"বেতন",monthT:"মাসের হিসাব"});
+Object.assign(T.en,{emp:"Employees",addExp:"Add New Expense",sal:"Monthly salary (৳)",saveSal:"Set salary",present:"✅ Present",workDays:"Days worked",entDays:"Days with entries",payNow:"💵 Paid salary",paidM:"Paid this month",paidAll:"Total paid",dueSal:"Salary due",since:"Joined",allTime:"All time",attAdd:"Attendance",payList:"Salary payments",noEmpA:"No active employees",backL:"← Back to list",cnt:"",salaryT:"Salary",monthT:"This month"});
+function empV(){const inf=S.uinfo,ap=Object.entries(inf).filter(([,x])=>x.role==="employee"&&x.status==="approved");
+ if(empSel&&inf[empSel])return empD(empSel);
+ if(!ap.length)return `<p class="note">${t("noEmpA")}</p>`;
+ return ap.map(([u,x])=>`<button class="card" data-emp="${u}" style="display:flex;gap:12px;align-items:center;text-align:left;background:var(--card);margin-bottom:10px"><img class="av" src="${x.photo||""}"><div><b>${esc(x.name)}</b><div class="note">📞 ${esc(x.phone)}</div></div></button>`).join("")}
+function empD(u){const x=S.uinfo[u],pay=S.pay[u]||{},E=allE().filter(e=>e.uid===u);if(!emon)emon=today().slice(0,7);const M=emon;
+ const sum=a=>a.reduce((s2,e)=>s2+(+e.amt||0),0),em=E.filter(e=>(e.date||"").slice(0,7)===M);
+ const sl=em.filter(e=>isS(e.type)),pu=em.filter(e=>e.type==="purchase"),ex=em.filter(e=>e.type==="expense"),slA=E.filter(e=>isS(e.type)),puA=E.filter(e=>e.type==="purchase");
+ const pays=(pay.pays||[]).filter(p=>(p.date||"").slice(0,7)===M).sort((a,b)=>(b.date||"").localeCompare(a.date||"")),paidM=sum(pays),paidAll=sum(pay.pays||[]);
+ const days=(pay.days||[]).filter(d=>d.slice(0,7)===M).sort(),entDays=new Set(em.map(e=>e.date)).size,monthly=+pay.salary||0,due=monthly-paidM;
+ const row=(k,v)=>`<div class="row"><span>${k}</span><b>${v}</b></div>`;
+ return `<button class="s" data-eback="1" style="margin-bottom:10px">${t("backL")}</button>
+ <div class="card"><div style="display:flex;gap:14px;align-items:center"><img class="av big" src="${x.photo||""}"><div><div class="v">${esc(x.name)}</div><div class="note"><a href="tel:${esc(x.phone)}">📞 ${esc(x.phone)}</a></div><div class="note">📍 ${esc(x.address||"")}</div><div class="note">${t("since")}: ${x.t?new Date(x.t).toLocaleDateString(L==="bn"?"bn-BD":"en-GB"):""}</div></div></div></div>
+ <div class="card"><label>${t("month")}</label><input id="e_mon" type="month" value="${M}">
+ ${row("🟢 "+t("sales"),sl.length+" "+t("cnt")+" · "+fmt(sum(sl)))}${row("🔴 "+t("pur"),pu.length+" "+t("cnt")+" · "+fmt(sum(pu)))}${row("💸 "+t("exp"),ex.length+" "+t("cnt")+" · "+fmt(sum(ex)))}
+ <div class="note" style="margin-top:6px">${t("allTime")}: 🟢 ${fmt(sum(slA))} · 🔴 ${fmt(sum(puA))}</div></div>
+ <div class="card"><b>💰 ${t("salaryT")}</b><label>${t("sal")}</label><input id="e_sal" type="number" inputmode="decimal" min="0" value="${monthly||""}"><button class="s" data-esal="${u}">${t("saveSal")}</button>
+ ${row(t("sal"),fmt(monthly))}${row(t("paidM"),fmt(paidM))}${row(t("dueSal"),`<span class="${due>0?'neg':'pos'}">${fmt(due)}</span>`)}${row(t("paidAll"),fmt(paidAll))}</div>
+ <div class="card"><b>📅 ${t("attAdd")}</b>${row(t("workDays"),days.length)}${row(t("entDays"),entDays)}<input id="e_ad" type="date" value="${today()}"><button class="s" data-eatt="${u}">${t("present")}</button>
+ <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">${days.map(d=>`<span class="tag">${esc(d.slice(8))} <button class="s" style="padding:0 6px" data-edeld="${d}" data-eu="${u}">×</button></span>`).join("")}</div></div>
+ <div class="card"><b>${t("payList")}</b><input id="e_pa" type="number" inputmode="decimal" min="0" placeholder="${t("amt")}"><select id="e_pc"><option value="cash">${t("cash")}</option><option value="bank">${t("bank")}</option></select><input id="e_pd" type="date" value="${today()}"><input id="e_pn" maxlength="60" placeholder="${t("note")}"><button class="p" data-epay="${u}">${t("payNow")}</button>
+ ${pays.map(p=>`<div class="row"><div><b>${fmt(p.amt)}</b> <span class="note">${t(p.acct||"cash")} · ${esc(p.date)}</span><div class="note">${esc(p.note||"")}</div></div><button class="s" data-edelp="${p.id}" data-eu="${u}">${t("del")}</button></div>`).join("")}</div>`}
+document.addEventListener("click",async ev=>{const el=ev.target.closest("button");if(!el)return;const d=el.dataset;
+ if(d.emp){empSel=d.emp;render();return}
+ if(d.eback!==undefined){empSel="";render();return}
+ const save=async(u,fn)=>{const cur=S.pay[u]||{},nx={salary:cur.salary||0,pays:[...(cur.pays||[])],days:[...(cur.days||[])]};fn(nx);try{await db.collection("payroll").doc(u).set(nx)}catch(e){toast=t("err");render();return false}return true};
+ if(d.esal){const v=parseFloat(document.getElementById("e_sal").value)||0;await save(d.esal,n=>{n.salary=v});return}
+ if(d.eatt){const dt=document.getElementById("e_ad").value;if(!dt)return;await save(d.eatt,n=>{if(!n.days.includes(dt))n.days.push(dt)});return}
+ if(d.edeld){await save(d.eu,n=>{n.days=n.days.filter(x=>x!==d.edeld)});return}
+ if(d.epay){const a=parseFloat(document.getElementById("e_pa").value);if(!(a>0))return;
+  const id="pay"+Date.now().toString(36)+Math.random().toString(36).slice(2,4),dt=document.getElementById("e_pd").value||today(),ac=document.getElementById("e_pc").value,nt=document.getElementById("e_pn").value.trim(),nm=(S.uinfo[d.epay]||{}).name||"";
+  const ok=await save(d.epay,n=>{n.pays.push({id,date:dt,amt:a,acct:ac,note:nt,by:me,t:Date.now()})});
+  if(ok)await mutate(me,(x,lg)=>{const ent={id:"x"+id,t:Date.now(),type:"expense",amt:a,acct:ac,date:dt,note:"বেতন — "+nm+(nt?" ("+nt+")":"")};x.entries.push(ent);lg("add",null,ent)});return}
+ if(d.edelp){const p=((S.pay[d.eu]||{}).pays||[]).find(q=>q.id===d.edelp);if(!confirm(t("sure")))return;
+  if(await save(d.eu,n=>{n.pays=n.pays.filter(q=>q.id!==d.edelp)}))await mutate((p&&p.by)||me,(x,lg)=>{const o=x.entries.find(e=>e.id==="x"+d.edelp);if(o){x.entries=x.entries.filter(e=>e.id!=="x"+d.edelp);lg("del",o)}});return}
+});
+document.addEventListener("change",ev=>{if(ev.target.id==="e_mon"&&ev.target.value){emon=ev.target.value;render()}});
+Object.assign(T.bn,{masterT:"মূল মালিক (আমি)",masterD:"শুধু পাসওয়ার্ড দিয়ে ঢুকুন",masterB:"পাসওয়ার্ড দিয়ে ঢুকুন",ownerD:"দ্বিতীয় মালিক — মূল মালিকের অনুমতি লাগবে",usedNo:"এই নম্বর আগে ব্যবহার হয়েছে। লগইন করে দেখুন, বা পাসওয়ার্ড মিলিয়ে নিন।",weakPw:"পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের দিন",noEP:"Firebase-এ Email/Password চালু করা হয়নি",noRules:"ডাটাবেসের রুলস ঠিক নেই বা Publish হয়নি",noNet:"ইন্টারনেটে সমস্যা, আবার চেষ্টা করুন",badKey:"firebaseConfig ভুল আছে",masterLink:"আমি মূল মালিক — পাসওয়ার্ড দিয়ে ঢুকুন",wrongM:"পাসওয়ার্ড ভুল"});
+Object.assign(T.en,{masterT:"Main owner (me)",masterD:"Log in with password only",masterB:"Log in with password",ownerD:"Second owner — needs main owner approval",usedNo:"This number is already used. Try logging in, or check the password.",weakPw:"Password must be at least 6 characters",noEP:"Email/Password sign-in is not enabled in Firebase",noRules:"Database rules are wrong or not published",noNet:"Network problem, try again",badKey:"firebaseConfig is wrong",masterLink:"I am the main owner — log in with password",wrongM:"Wrong password"});
+Object.assign(T.bn,{rep:"রিপোর্ট",from:"শুরুর তারিখ",to:"শেষ তারিখ",topI:"সবচেয়ে বেশি বিক্রি হওয়া মাল",daily:"দিন অনুযায়ী হিসাব",byWho:"কে কত বিক্রি করেছেন",thr:"স্টক এতটা বা কম হলে সতর্ক করুন (পিস)",lowT:"স্টক কম",lowA:"স্টক কম আছে — দেখুন",led:"খতিয়ান",bal:"বাকি",back2:"← পার্টির তালিকা",csvR:"📄 এই রিপোর্ট Excel (CSV) সেভ করুন"});
+Object.assign(T.en,{rep:"Report",from:"From",to:"To",topI:"Top selling items",daily:"Day by day",byWho:"Sales by person",thr:"Warn when stock is at or below (pcs)",lowT:"Low stock",lowA:"Low stock — check",led:"Ledger",bal:"Balance",back2:"← Party list",csvR:"📄 Save this report (CSV)"});
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+(function(){
+ if(/PASTE/.test(firebaseConfig.apiKey)){loaded=true;render();return}
+ firebase.initializeApp(firebaseConfig);try{emailjs.init(MAIL.key)}catch(e){}
+ db=firebase.firestore();auth=firebase.auth();
+ assets={upload:async blob=>{const id="i"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);const full=await rd(blob),thumb=await thumbOf(blob);await db.collection("photos").doc(id).set({full});return {id,thumb}}};
+ try{auth.setPersistence(firebase.auth.Auth.Persistence.NONE).catch(()=>{})}catch(e){}
+ auth.onAuthStateChanged(u=>{if(!u){authed=false;me=null;myUser=null;if(unMe){unMe();unMe=null}started=false;render();return}authed=true;me=u.uid;watchMe();render()});
+ render();
+})();
+</script></body></html>
