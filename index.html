@@ -369,4 +369,6 @@ if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(
  auth.onAuthStateChanged(u=>{if(!u){authed=false;me=null;myUser=null;if(unMe){unMe();unMe=null}started=false;render();return}authed=true;me=u.uid;watchMe();render()});
  render();
 })();
-</script></body></html>
+</script>
+ <script src="addon.js"></script>
+</body></html>
