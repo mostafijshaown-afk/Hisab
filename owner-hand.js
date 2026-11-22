@@ -12,17 +12,18 @@ function card(){
  var E=allE();
  var depDone=function(u){return sumA(D.filter(function(d){return d.from===u&&d.st==="done"}))};
  var R=function(ic,l,v,sub){return '<div class="row"><div>'+ic+' '+l+(sub?'<div class="note">'+sub+'</div>':'')+'</div><b>'+fmt(v)+'</b></div>'};
- var shop=sumA(D.filter(function(d){return d.st==="done"}));
+ var mine=Math.max(0,Math.round(+H[me]||0));
+ var shop=sumA(D.filter(function(d){return d.st==="done"}))+cashOf(me)-mine;
  var bank=calc(E).bank,total=shop+bank,out="";
  Object.keys(S.uinfo).forEach(function(u){
   var x=S.uinfo[u];
   if(x.status!=="approved"||x.deleted||!x.role)return;
-  var v=(+H[u]||0)+cashOf(u);
+  var v=(u===me)?Math.round(+H[me]||0):(+H[u]||0)+cashOf(u);
   if(x.role==="employee")v-=depDone(u);
   v=Math.round(v);
   if(v===0)return;
   total+=v;
-  out+=R(x.role==="owner"?"👤":"🟠",esc(x.name||"")+(u===me?" (আমি)":"")+"-এর হাতে",v,x.role==="employee"&&v>0?"জমা বাকি":"");
+  out+=R(x.role==="owner"?"👤":"🟠",esc(x.name||"")+"-এর হাতে",v,x.role==="employee"&&v>0?"জমা বাকি":"");
  });
  return '<div class="card"><b>💰 টাকা কোথায়</b>'
   +R("🟢","দোকানের ক্যাশ",shop)
