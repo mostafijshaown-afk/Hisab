@@ -10,8 +10,7 @@ document.addEventListener("click", function(ev){
     var btn = ev.target.closest ? ev.target.closest("button") : null;
     if(!btn) return;
     var txt = btn.textContent || "";
-    var d = btn.dataset || {};
-    if(d.save === undefined && d.pay === undefined && txt.indexOf("Save") === -1) return;
+    if(txt.indexOf("Save") === -1 && txt.indexOf("সেভ") === -1) return;
     setTimeout(function(){ send("🔔 নতুন হিসাব যোগ হইছে! অ্যাপ খুলে দেখো"); }, 1500);
   }catch(e){}
 }, true);
