@@ -7,26 +7,30 @@ function send(text){
 }
 window.sendTelegram = send;
 
-function wrap(){
-  if(typeof window.sendMail === "function" && !window.sendMail.__tgWrapped){
-    var _s = window.sendMail;
-    var wrapped = function(who, txt){
-      try{ _s(who, txt); }catch(e){}
-      send("🔔 " + who + "\n" + txt + "\n\nঅ্যাপ: https://mmhisab.vercel.app");
-    };
-    wrapped.__tgWrapped = true;
-    window.sendMail = wrapped;
-    return true;
-  }
-  return false;
+function getVal(id){
+  try{
+    var el = document.getElementById(id);
+    return el ? el.value : "";
+  }catch(e){ return ""; }
 }
-if(!wrap()){
-  var tries = 0;
-  var timer = setInterval(function(){
-    tries++;
-    if(wrap() || tries > 50){
-      clearInterval(timer);
+
+document.addEventListener("click", function(ev){
+  try{
+    var btn = ev.target.closest ? ev.target.closest("button") : null;
+    if(!btn) return;
+    var d = btn.dataset || {};
+    // Save, Pay, Salary - jekono save type button
+    if(d.save === undefined && d.pay === undefined && !d.sav && btn.textContent.indexOf("Save") === -1 && btn.textContent.indexOf("save") === -1){
+      return;
     }
-  }, 200);
-}
+    // Save howar jonno 1.5 sec wait, tarpor pathao
+    setTimeout(function(){
+      var amt = getVal("e_amt") || getVal("e_pa") || getVal("e_sal") || "";
+      var note = getVal("e_note") || getVal("e_nm") || "";
+      var type = d.save || d.pay || "hisab";
+      var msg = "🔔 Notun Hisab Add Hoyeche!\n\nType: " + type + "\nAmount: " + amt + "\nNote: " + note + "\n\nApp: https://mmhisab.vercel.app";
+      send(msg);
+    }, 1500);
+  }catch(e){}
+}, true);
 })();
