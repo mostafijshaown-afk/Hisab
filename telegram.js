@@ -1,5 +1,5 @@
 (function(){
-var URL="/api/notify";
+var URL="https://hisab-zeta-livid.vercel.app/api/notify";
 function send(text){
  try{
   fetch(URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:text})}).catch(function(){});
