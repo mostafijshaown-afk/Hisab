@@ -6,8 +6,12 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { text } = req.body || {};
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+  const token = process.env.BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN || process.env.TG_TOKEN;
+  const chatId = process.env.GROUP_ID || process.env.TELEGRAM_CHAT_ID || process.env.TG_CHAT;
+
+  if (!token || !chatId) {
+    return res.status(500).json({ error: 'Token ba Chat ID pawa jay nai' });
+  }
 
   const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: 'POST',
