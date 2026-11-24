@@ -1,5 +1,5 @@
 (function(){
-var CUT="2026-11-24";
+var CUT="2026-11-23";
 var D=[],H={},got=false;
 var sumA=function(a){return a.reduce(function(s,e){return s+(+e.amt||0)},0)};
 var typ=function(){return typeof typing==="function"&&typing()};
@@ -11,9 +11,10 @@ function listen(){
 function cashOf(u){return calc(allE().filter(function(e){return e.uid===u})).cash}
 function newOf(u){return calc(allE().filter(function(e){return e.uid===u&&(e.date||"")>CUT})).cash}
 function depDone(u){return sumA(D.filter(function(d){return d.from===u&&d.st==="done"}))}
+function isMain(u){return u===me?isMaster():(S.uinfo[u]||{}).phone===undefined||(S.uinfo[u]||{}).phone===""}
 function handOf(u,x){
  var v;
- if(x.role==="owner")v=newOf(u);
+ if(x.role==="owner"){v=isMain(u)?newOf(u):cashOf(u)}
  else v=(+H[u]||0)+cashOf(u);
  v-=depDone(u);
  return Math.round(v);
@@ -24,7 +25,7 @@ function card(){
  var shop=sumA(D.filter(function(d){return d.st==="done"}));
  Object.keys(S.uinfo).forEach(function(u){
   var x=S.uinfo[u];
-  if(x.status==="approved"&&!x.deleted&&x.role==="owner")shop+=cashOf(u)-newOf(u);
+  if(x.status==="approved"&&!x.deleted&&x.role==="owner"&&isMain(u))shop+=cashOf(u)-newOf(u);
  });
  shop=Math.round(shop);
  var bank=calc(E).bank,total=shop+bank,out="";
