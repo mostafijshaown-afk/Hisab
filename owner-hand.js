@@ -11,7 +11,7 @@ function listen(){
 function cashOf(u){return calc(allE().filter(function(e){return e.uid===u})).cash}
 function newOf(u){return calc(allE().filter(function(e){return e.uid===u&&(e.date||"")>CUT})).cash}
 function depDone(u){return sumA(D.filter(function(d){return d.from===u&&d.st==="done"}))}
-function isMain(u){return u===me?isMaster():(S.uinfo[u]||{}).phone===undefined||(S.uinfo[u]||{}).phone===""}
+function isMain(u){return ((S.uinfo[u]||{}).name||"").trim().toUpperCase()==="MOSTAFIJ"}
 function handOf(u,x){
  var v;
  if(x.role==="owner"){v=isMain(u)?newOf(u):cashOf(u)}
