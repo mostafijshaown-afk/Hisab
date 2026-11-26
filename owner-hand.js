@@ -48,7 +48,12 @@ function card(){
 document.addEventListener("click",async function(ev){
  var el=ev.target.closest("button");if(!el||!el.dataset.xdp)return;
  var a=parseFloat(el.dataset.amt);if(!(a>0))return;
- if(!confirm("৳"+Math.round(a)+" দোকানের ক্যাশে রাখলেন?"))return;
+ var inp=prompt("কত টাকা দোকানের ক্যাশে রাখলেন?\n(এখন হাতে আছে ৳"+Math.round(a)+")",String(Math.round(a)));
+ if(inp===null)return;
+ inp=String(inp).replace(/[০-৯]/g,function(c){return "০১২৩৪৫৬৭৮৯".indexOf(c)}).replace(/[^0-9.]/g,"");
+ var x=parseFloat(inp);
+ if(!(x>0)||x>a){alert("সঠিক পরিমাণ লিখুন (সর্বোচ্চ ৳"+Math.round(a)+")");return}
+ a=x;
  var id="d"+Date.now().toString(36)+Math.random().toString(36).slice(2,4);
  try{await db.collection("deposits").doc(id).set({id:id,from:me,fromName:(myUser&&myUser.name)||"",to:me,amt:a,date:today(),st:"done",by:me,at:Date.now(),t:Date.now()})}
  catch(e){toast=t("err");render()}
