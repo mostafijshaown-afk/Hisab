@@ -9,11 +9,9 @@ function card(){
   pcs+=r;cost+=r*(ac[k]||0);
   if(sq[k]>0)sell+=r*(sp[k]/sq[k]);
  });
- var R=function(l,v,s){return '<div class="row"><div>'+l+(s?'<div class="note">'+s+'</div>':'')+'</div><b>'+v+'</b></div>'};
  return '<div class="card"><b>📦 স্টকের মোট</b>'
-  +R("সব মিলিয়ে কত পিস মাল আছে",pcs+" পিস")
-  +R("কেনা দামে কত টাকার মাল আছে",fmt(cost))
-  +R("বিক্রি দামে কত টাকার মাল আছে",fmt(sell),"গড় বিক্রি দাম ধরে। যে মাল এখনও বিক্রিই হয়নি, তার দাম ধরা হয়নি")
+  +'<div style="margin-top:6px;font-size:15px;font-weight:700;line-height:1.7">📦 '+pcs+' পিস · 🛒 কেনা '+fmt(cost)+' · 🟢 বিক্রি '+fmt(sell)+'</div>'
+  +'<div class="note" style="margin-top:4px">কেনা = কেনা দামে মালের দাম। বিক্রি = গড় বিক্রি দামে মালের দাম (যে মাল এখনও বিক্রি হয়নি, তার দাম ধরা হয়নি)।</div>'
   +'</div>';
 }
 var _s=stockV;
