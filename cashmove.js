@@ -26,7 +26,6 @@ dash=function(){
  if(i<0)return s+add;
  return s.slice(0,i)+add+s.slice(i);
 };
-/* নামের লাইনের নিচে "ক্যাশ থেকে নিলাম" বোতাম, শুধু নিজের লাইনে */
 function addBtns(){
  var card=Array.from(document.querySelectorAll(".card")).find(function(c){var b=c.querySelector("b");return b&&b.textContent.indexOf("টাকা কোথায়")>=0});
  if(!card||card.querySelector("[data-xctake]")||!myUser)return;
@@ -35,7 +34,16 @@ function addBtns(){
  for(var i=0;i<rows.length;i++){
   if(rows[i].textContent.indexOf(nm)>=0&&!rows[i].querySelector("[data-xctake]")){
    var d=rows[i].firstElementChild;
-   d.insertAdjacentHTML("beforeend",'<div style="margin-top:4px"><button class="s" data-xctake="1">⬇️ ক্যাশ থেকে নিলাম</button></div>');
+   var old=d.querySelector("[data-xdp]");
+   if(old&&old.parentElement){
+    var w=old.parentElement;
+    w.style.cssText="display:flex;gap:6px;flex-wrap:nowrap;margin-top:4px";
+    old.style.marginTop="0";
+    old.textContent="⬆️ ক্যাশে রাখলাম";
+    w.insertAdjacentHTML("beforeend",'<button class="s" data-xctake="1">⬇️ নিলাম</button>');
+   }else{
+    d.insertAdjacentHTML("beforeend",'<div style="margin-top:4px"><button class="s" data-xctake="1">⬇️ ক্যাশ থেকে নিলাম</button></div>');
+   }
    return;
   }
  }
